@@ -100,6 +100,38 @@ async def hub_read_rows(tenant_id: str, table: str, top: int = 50, skip: int = 0
     return await _get(f"/tenants/{tenant_id}/connectors/d365/tables/{table}/rows",
                       params={"top": top, "skip": skip})
 
+async def hub_export_table(tenant: str, logical: str, fmt: str = "json", route: str = "local", select: str | None = None, top: int = 1000):
+    params = {"format": fmt, "route": route, "top": top}
+    if select:
+        params["select"] = select
+    async with httpx.AsyncClient() as cli:
+        r = await cli.post(f"{HUB}/tenants/{tenant}/connectors/d365/tables/{logical}/export", params=params)
+        r.raise_for_status()
+        return r.json()
+    
+DEFAULT_TIMEOUT = float(os.getenv("HUB_TIMEOUT_SECONDS", "60"))  # allow override
+
+async def hub_get_rows(tenant: str, logical: str, top: int | None = None,
+                       select: str | None = None, orderby: str | None = None,
+                       filter_: str | None = None):
+    params = {}
+    if top is not None:
+        params["$top"] = str(top)
+    if select:
+        params["$select"] = select
+    if orderby:
+        params["$orderby"] = orderby
+    if filter_:
+        params["$filter"] = filter_
+
+    async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as cli:
+        r = await cli.get(
+            f"{HUB}/tenants/{tenant}/connectors/d365/tables/{logical}/rows",
+            params=params
+        )
+        r.raise_for_status()
+        return r.json()
+
 
 # Optional explicit export list (avoids name confusion)
 __all__ = [
