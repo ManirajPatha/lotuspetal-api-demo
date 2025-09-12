@@ -118,7 +118,7 @@ async def hub_get_rows(tenant: str, logical: str, top: int | None = None,
     if top is not None:
         params["$top"] = str(top)
     if select:
-        params["$select"] = select
+        params["$select"] = select or "*"
     if orderby:
         params["$orderby"] = orderby
     if filter_:
@@ -138,15 +138,21 @@ async def hub_rows(
     select: str | None = None,
     top: int = 50,
     skip: int = 0,
+    orderby: str | None = None,
+    filter_: str | None = None,
 ):
-    params = {"top": top, "skip": skip}
-    if select:
-        params["select"] = select
+    params = {"$top": top, "$select": select or "*"}
+    if skip:
+        params["$skip"] = skip
+    if orderby:
+        params["$orderby"] = orderby
+    if filter_:
+        params["$filter"] = filter_
+
     return await _get(
         f"/tenants/{tenant_id}/connectors/d365/tables/{logical}/rows",
         params=params,
     )
-
 
 # Optional explicit export list (avoids name confusion)
 __all__ = [

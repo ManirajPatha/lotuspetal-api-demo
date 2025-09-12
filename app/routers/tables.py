@@ -1,7 +1,8 @@
 # app/routers/tables.py
 from typing import List
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Body, Query
 from pydantic import BaseModel
+from app.services.hub_client import hub_post
 from app.services.integration_hub_client import hub_export_table, hub_list_tables
 
 router = APIRouter()
@@ -17,11 +18,12 @@ async def export_table(logical: str, tenant_id: str = Query("demo"), fmt: str = 
 class RegisterTablesBody(BaseModel):
     tables: List[str]
 
-@router.post("/connectors/d365/tables:register")
-async def register_tables(body: RegisterTablesBody, tenant_id: str = Query("demo")):
-    # simple proxy into the hub
-    from app.services.integration_hub_client import hub_register_tables
-    return await hub_register_tables(tenant_id, body.tables)
+@router.post("/connections/{tenant_id}/d365/tables:register")
+async def demo_register_tables(tenant_id: str, body: dict = Body(...)):
+    return await hub_post(
+        f"/tenants/{tenant_id}/connectors/d365/tables:register",
+        json=body
+    )
 
 @router.get("/connectors/d365/tables/{logical}/rows")
 async def read_rows(

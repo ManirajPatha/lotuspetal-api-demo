@@ -33,3 +33,15 @@ async def hub_rows(tenant: str, logical: str, top: int = 50) -> dict:
         r = await cli.get(url, params=params, headers=_headers())
         r.raise_for_status()
         return r.json()
+
+async def hub_post(path: str, json: dict):
+    async with httpx.AsyncClient(timeout=30) as cli:
+        r = await cli.post(f"{HUB_URL}{path}", json=json)
+        r.raise_for_status()
+        return r.json()
+
+async def hub_get(path: str, params: dict = None):
+    async with httpx.AsyncClient(timeout=30) as cli:
+        r = await cli.get(f"{HUB_URL}{path}", params=params)
+        r.raise_for_status()
+        return r.json()
