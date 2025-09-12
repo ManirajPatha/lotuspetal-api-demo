@@ -3,8 +3,10 @@ from app.db import init_db
 from app.routers import connections, submissions
 from app.routers import tables
 from app.routers import d365_rows
+from app.routers import tables as tables_router
 
 app = FastAPI(title="lotuspetal-api-demo")
+
 
 init_db()
 
@@ -24,3 +26,4 @@ app.include_router(connections.router)
 app.include_router(submissions.router)
 app.include_router(tables.router)
 app.include_router(d365_rows.router)
+app.include_router(tables_router.router) 

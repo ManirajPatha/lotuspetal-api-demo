@@ -131,6 +131,21 @@ async def hub_get_rows(tenant: str, logical: str, top: int | None = None,
         )
         r.raise_for_status()
         return r.json()
+    
+async def hub_rows(
+    tenant_id: str,
+    logical: str,
+    select: str | None = None,
+    top: int = 50,
+    skip: int = 0,
+):
+    params = {"top": top, "skip": skip}
+    if select:
+        params["select"] = select
+    return await _get(
+        f"/tenants/{tenant_id}/connectors/d365/tables/{logical}/rows",
+        params=params,
+    )
 
 
 # Optional explicit export list (avoids name confusion)
@@ -142,4 +157,7 @@ __all__ = [
     "hub_list_tables",
     "hub_register_tables",
     "hub_read_rows",
+    "hub_rows",           # <- alias
+    "hub_export_table",
+    "hub_get_rows",
 ]
